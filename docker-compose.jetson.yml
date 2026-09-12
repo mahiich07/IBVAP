@@ -1,0 +1,34 @@
+version: '3.8'
+
+# ==============================================================================
+# NVIDIA Jetson Production Compose Override (Orin Nano / AGX Orin / Xavier NX)
+# Run with: docker compose -f docker-compose.yml -f docker-compose.jetson.yml up -d
+# ==============================================================================
+
+services:
+  ibvap-backend:
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility,video
+
+  ibvap-edge-worker:
+    runtime: nvidia
+    ipc: host
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=compute,utility,video
+    devices:
+      # Hardware Video Decoders (nvv4l2decoder) & CSI/USB camera pass-through
+      - "/dev/nvhost-ctrl:/dev/nvhost-ctrl"
+      - "/dev/nvhost-ctrl-gpu:/dev/nvhost-ctrl-gpu"
+      - "/dev/nvhost-as-gpu:/dev/nvhost-as-gpu"
+      - "/dev/nvmap:/dev/nvmap"
+      - "/dev/video0:/dev/video0"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
